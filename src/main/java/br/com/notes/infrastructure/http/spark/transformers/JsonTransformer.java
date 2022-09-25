@@ -1,15 +1,12 @@
 package br.com.notes.infrastructure.http.spark.transformers;
 
-import com.google.gson.Gson;
+import br.com.notes.infrastructure.converter.gson.GsonConverter;
 import spark.ResponseTransformer;
 
 public class JsonTransformer implements ResponseTransformer {
-
-    private Gson gson = new Gson();
-
     @Override
     public String render(Object object) {
-        return gson.toJson(object);
+        return GsonConverter.toJson(object);
     }
 
 }

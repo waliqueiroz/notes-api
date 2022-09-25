@@ -1,9 +1,21 @@
+import nu.studer.gradle.jooq.JooqEdition
+
 plugins {
     id 'java'
+    id "application"
+    id 'nu.studer.jooq' version '7.1.1'
 }
 
 group 'br.com'
 version '1.0-SNAPSHOT'
+
+ext {
+    javaMainClass = "br.com.notes.NotesApplication"
+}
+
+application {
+    mainClassName = javaMainClass
+}
 
 repositories {
     mavenCentral()
@@ -12,6 +24,10 @@ repositories {
 dependencies {
     implementation "com.sparkjava:spark-core:2.9.4"
     implementation 'com.google.code.gson:gson:2.9.1'
+    implementation 'org.yaml:snakeyaml:1.31'
+    implementation 'com.zaxxer:HikariCP:5.0.1'
+    implementation  'mysql:mysql-connector-java:8.0.15'
+    jooqGenerator  'mysql:mysql-connector-java:8.0.15'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
@@ -19,4 +35,61 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+jooq {
+    version = '3.16.4'  // default (can be omitted)
+    edition = JooqEdition.OSS  // default (can be omitted)
+
+    configurations {
+        main {  // name of the jOOQ configuration
+            generateSchemaSourceOnCompilation = true  // default (can be omitted)
+
+            generationTool {
+                logging = org.jooq.meta.jaxb.Logging.WARN
+                jdbc {
+                    driver = 'com.mysql.cj.jdbc.Driver'
+                    url = 'jdbc:mysql://localhost:3306/notes_db'
+                    user = 'root'
+                    password = '12345678'
+                    properties {
+                        property {
+                            key = 'useSSL'
+                            value = 'false'
+                        }
+                    }
+                }
+                generator {
+                    name = 'org.jooq.codegen.DefaultGenerator'
+                    database {
+                        name = 'org.jooq.meta.mysql.MySQLDatabase'
+                        inputSchema = 'notes_db'
+//                        forcedTypes {
+//                            forcedType {
+//                                name = 'varchar'
+//                                includeExpression = '.*'
+//                                includeTypes = 'JSONB?'
+//                            }
+//                            forcedType {
+//                                name = 'varchar'
+//                                includeExpression = '.*'
+//                                includeTypes = 'INET'
+//                            }
+//                        }
+                    }
+                    generate {
+                        deprecated = false
+                        records = true
+                        immutablePojos = true
+                        fluentSetters = true
+                    }
+                    target {
+                        packageName = 'nu.studer.sample'
+                        directory = 'build/generated-src/jooq/main'  // default (can be omitted)
+                    }
+                    strategy.name = 'org.jooq.codegen.DefaultGeneratorStrategy'
+                }
+            }
+        }
+    }
 }
