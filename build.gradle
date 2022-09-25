@@ -4,6 +4,7 @@ plugins {
     id 'java'
     id "application"
     id 'nu.studer.jooq' version '7.1.1'
+    id 'org.liquibase.gradle' version '2.0.4'
 }
 
 group 'br.com'
@@ -29,12 +30,27 @@ dependencies {
     implementation  'mysql:mysql-connector-java:8.0.15'
     jooqGenerator  'mysql:mysql-connector-java:8.0.15'
 
+    liquibaseRuntime 'org.liquibase:liquibase-core:4.2.2'
+    liquibaseRuntime 'mysql:mysql-connector-java:8.0.15'
+
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 }
 
 test {
     useJUnitPlatform()
+}
+
+liquibase {
+    activities {
+        main {
+            changeLogFile  "src/main/resources/database/migrations/changelog.sql"
+            url "jdbc:mysql://localhost:3306/notes_db"
+            username "root"
+            password "12345678"
+            driver 'com.mysql.cj.jdbc.Driver'
+        }
+    }
 }
 
 jooq {
